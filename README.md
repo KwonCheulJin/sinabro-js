@@ -11,5 +11,5 @@ cd ep01
 yarn install
 yarn dev
 ```
-위와 같이 실행
+위와 같이 실행하면 됩니다.
 
