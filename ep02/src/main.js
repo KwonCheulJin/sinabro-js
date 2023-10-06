@@ -26,35 +26,43 @@ function sumAllCounts(countMap) {
   return Object.values(countMap).reduce((acc, cur) => acc + cur, 0);
 }
 
-async function main() {
-  const products = await getProducts();
-  const countMap = {};
-
-  document.querySelector('#products').innerHTML = products
-    .map(
-      (product, index) => `
-    <div class="product" data-product-id="${product.id}" data-product-index="${index}">
-      <img src="${product.images[0]}" alt="Image of ${product.name}"/>
-      <p>${product.name}</p>
-      <div class="flex items-center justify-between">
-        <span>Price: ${product.regularPrice}</span>
-        <div>
-          <button type="button" class="btn-decrease disabled:cursor-not-allowed disabled:opacity-50 bg-green-200 py-1 px-3 rounded-full text-green-800 hover:bg-green-300">-</button>
-          <span class="cart-count text-green-800"></span>
-          <button type="button" class="btn-increase bg-green-200 py-1 px-3 rounded-full text-green-800 hover:bg-green-300">+</button>
-        </div>
+function getProductHTML(product, count = 0) {
+  return `
+  <div class="product" data-product-id="${product.id}">
+    <img src="${product.images[0]}" alt="Image of ${product.name}"/>
+    <p>${product.name}</p>
+    <div class="flex items-center justify-between">
+      <span>Price: ${product.regularPrice}</span>
+      <div>
+        <button type="button" class="btn-decrease disabled:cursor-not-allowed disabled:opacity-50 bg-green-200 py-1 px-3 rounded-full text-green-800 hover:bg-green-300">-</button>
+        <span class="cart-count text-green-800">${
+          count === 0 ? '' : count
+        }</span>
+        <button type="button" class="btn-increase bg-green-200 py-1 px-3 rounded-full text-green-800 hover:bg-green-300">+</button>
       </div>
     </div>
-  `
-    )
+  </div>
+`;
+}
+
+async function main() {
+  const products = await getProducts();
+  const productMap = {};
+  const countMap = {};
+
+  products.forEach(product => {
+    productMap[product.id] = product;
+  });
+
+  document.querySelector('#products').innerHTML = products
+    .map(product => getProductHTML(product, countMap[product.id]))
     .join('');
 
   document.querySelector('#products').addEventListener('click', event => {
     const targetElement = event.target;
     const productElement = findElement(targetElement, '.product');
     const productId = productElement.getAttribute('data-product-id');
-    const productIndex = productElement.getAttribute('data-product-index');
-    const product = products[productIndex];
+    const product = productMap[productId];
 
     if (
       targetElement.matches('.btn-decrease') ||
@@ -72,11 +80,30 @@ async function main() {
       cartCount.innerHTML = countMap[productId];
       if (countMap[productId] <= 0) {
         cartCount.innerHTML = '0';
+      } else {
+        const productIds = Object.keys(countMap);
+
+        document.querySelector('.cart_items').innerHTML = productIds
+          .map(productId => {
+            const productInCart = productMap[productId];
+            return getProductHTML(productInCart, countMap[productId]);
+          })
+          .join('');
       }
       document.querySelector('.total_count').innerHTML = `(${sumAllCounts(
         countMap
       )})`;
     }
+  });
+
+  document.querySelector('.btn-cart').addEventListener('click', () => {
+    document.body.classList.add('displaying_cart');
+  });
+  document.querySelector('.btn-close-cart').addEventListener('click', () => {
+    document.body.classList.remove('displaying_cart');
+  });
+  document.querySelector('.cart-dimmed-bg').addEventListener('click', () => {
+    document.body.classList.remove('displaying_cart');
   });
 }
 
