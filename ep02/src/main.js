@@ -21,8 +21,14 @@ function findElement(startingElement, selector) {
   }
   return null;
 }
+
+function sumAllCounts(countMap) {
+  return Object.values(countMap).reduce((acc, cur) => acc + cur, 0);
+}
+
 async function main() {
   const products = await getProducts();
+  const countMap = {};
 
   document.querySelector('#products').innerHTML = products
     .map(
@@ -33,8 +39,8 @@ async function main() {
       <div class="flex items-center justify-between">
         <span>Price: ${product.regularPrice}</span>
         <div>
-          <button type="button" class="btn-decrease bg-green-200 py-1 px-3 rounded-full text-green-800 hover:bg-green-300">-</button>
-          <span class="hidden text-green-800">3</span>
+          <button type="button" class="btn-decrease disabled:cursor-not-allowed disabled:opacity-50 bg-green-200 py-1 px-3 rounded-full text-green-800 hover:bg-green-300">-</button>
+          <span class="cart-count text-green-800"></span>
           <button type="button" class="btn-increase bg-green-200 py-1 px-3 rounded-full text-green-800 hover:bg-green-300">+</button>
         </div>
       </div>
@@ -49,18 +55,27 @@ async function main() {
     const productId = productElement.getAttribute('data-product-id');
     const productIndex = productElement.getAttribute('data-product-index');
     const product = products[productIndex];
-    console.log(
-      '🚀 ~ file: main.js:50 ~ document.querySelector ~ productId:',
-      product
-    );
-    if (targetElement.matches('.btn-decrease')) {
-      console.log(
-        '🚀 ~ file: main.js:38 ~ document.querySelector ~ btn-decrease:'
-      );
-    } else if (targetElement.matches('.btn-increase')) {
-      console.log(
-        '🚀 ~ file: main.js:41 ~ document.querySelector ~ btn-increase:'
-      );
+
+    if (
+      targetElement.matches('.btn-decrease') ||
+      targetElement.matches('.btn-increase')
+    ) {
+      if (countMap[productId] === undefined || countMap[productId] <= 0) {
+        countMap[productId] = 0;
+      }
+      if (targetElement.matches('.btn-decrease')) {
+        countMap[productId] -= 1;
+      } else if (targetElement.matches('.btn-increase')) {
+        countMap[productId] += 1;
+      }
+      const cartCount = productElement.querySelector('.cart-count');
+      cartCount.innerHTML = countMap[productId];
+      if (countMap[productId] <= 0) {
+        cartCount.innerHTML = '0';
+      }
+      document.querySelector('.total_count').innerHTML = `(${sumAllCounts(
+        countMap
+      )})`;
     }
   });
 }
