@@ -48,11 +48,57 @@ function getProductHTML(product, count = 0) {
 async function main() {
   const products = await getProducts();
   const productMap = {};
-  const countMap = {};
-
   products.forEach(product => {
     productMap[product.id] = product;
   });
+  const countMap = {};
+
+  const updateProductCount = productId => {
+    const productElement = document.querySelector(
+      `.product[data-product-id='${productId}']`
+    );
+    const cartCountElement = productElement.querySelector('.cart-count');
+    cartCountElement.innerHTML = countMap[productId];
+    if (countMap[productId] <= 0) {
+      cartCountElement.innerHTML = '0';
+    }
+  };
+
+  const updateCart = () => {
+    const productIds = Object.keys(countMap);
+
+    document.querySelector('.cart_items').innerHTML = productIds
+      .map(productId => {
+        const productInCart = productMap[productId];
+
+        return countMap[productId] === 0
+          ? ''
+          : getProductHTML(productInCart, countMap[productId]);
+      })
+      .join('');
+
+    document.querySelector('.total_count').innerHTML = `(${sumAllCounts(
+      countMap
+    )})`;
+  };
+
+  const increaseCount = productId => {
+    if (countMap[productId] === undefined || countMap[productId] <= 0) {
+      countMap[productId] = 0;
+    }
+    countMap[productId] += 1;
+    updateProductCount(productId);
+    updateCart();
+  };
+  const decreaseCount = productId => {
+    if (countMap[productId] === undefined || countMap[productId] < 1) {
+      countMap[productId] = 0;
+    } else {
+      countMap[productId] -= 1;
+      updateProductCount(productId);
+      updateCart();
+    }
+  };
 
   document.querySelector('#products').innerHTML = products
     .map(product => getProductHTML(product, countMap[product.id]))
@@ -68,31 +114,29 @@ async function main() {
       targetElement.matches('.btn-decrease') ||
       targetElement.matches('.btn-increase')
     ) {
-      if (countMap[productId] === undefined || countMap[productId] <= 0) {
-        countMap[productId] = 0;
-      }
       if (targetElement.matches('.btn-decrease')) {
-        countMap[productId] -= 1;
+        decreaseCount(productId);
       } else if (targetElement.matches('.btn-increase')) {
-        countMap[productId] += 1;
+        increaseCount(productId);
       }
-      const cartCount = productElement.querySelector('.cart-count');
-      cartCount.innerHTML = countMap[productId];
-      if (countMap[productId] <= 0) {
-        cartCount.innerHTML = '0';
-      } else {
-        const productIds = Object.keys(countMap);
+    }
+  });
 
-        document.querySelector('.cart_items').innerHTML = productIds
-          .map(productId => {
-            const productInCart = productMap[productId];
-            return getProductHTML(productInCart, countMap[productId]);
-          })
-          .join('');
+  document.querySelector('.cart_items').addEventListener('click', event => {
+    const targetElement = event.target;
+    const productElement = findElement(targetElement, '.product');
+    const productId = productElement.getAttribute('data-product-id');
+    const product = productMap[productId];
+
+    if (
+      targetElement.matches('.btn-decrease') ||
+      targetElement.matches('.btn-increase')
+    ) {
+      if (targetElement.matches('.btn-decrease')) {
+        decreaseCount(productId);
+      } else if (targetElement.matches('.btn-increase')) {
+        increaseCount(productId);
       }
-      document.querySelector('.total_count').innerHTML = `(${sumAllCounts(
-        countMap
-      )})`;
     }
   });
 
