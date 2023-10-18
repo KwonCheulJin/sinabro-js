@@ -12,7 +12,7 @@ async function getProducts() {
   }
 }
 
-export function getProductElement(product, count = 0) {
+export function getProductElement(product) {
   const element = document.createElement('div');
   element.classList.add('product');
   element.setAttribute('data-product-id', product.id);
@@ -23,7 +23,7 @@ export function getProductElement(product, count = 0) {
       <span>Price: ${product.regularPrice}</span>
       <div>
         <button type="button" class="btn-decrease disabled:cursor-not-allowed disabled:opacity-50 bg-green-200 py-1 px-3 rounded-full text-green-800 hover:bg-green-300">-</button>
-        <span class="cart-count text-green-800">${count}</span>
+        <span class="cart-count text-green-800" data-subscribe-to="countMap" data-subscribe-path="${product.id}"></span>
         <button type="button" class="btn-increase bg-green-200 py-1 px-3 rounded-full text-green-800 hover:bg-green-300">+</button>
       </div>
     </div>
