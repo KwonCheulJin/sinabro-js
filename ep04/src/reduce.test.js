@@ -6,13 +6,19 @@ describe('reduce method', () => {
     const numbers = [1, 2, 3, 4, 5];
 
     // TODO: do something here
-    const sum = 0;
+    const sum = numbers.reduce((acc, cur) => acc + cur, 0);
     expect(sum).toBe(15);
   });
 
   it('groups by genre', () => {
     // TODO: do something with `shows` here
-    const groupedShows = [];
+    const groupedShows = shows.reduce((acc, { title, genre }) => {
+      if (!acc[genre]) {
+        acc[genre] = [];
+      }
+      acc[genre].push(title);
+      return acc;
+    }, {});
     expect(groupedShows).toEqual({
       Comedy: ["Don't Look Up"],
       Drama: ['Stranger Things', 'Our Blues', 'Inventing Anna'],
@@ -23,7 +29,13 @@ describe('reduce method', () => {
 
   it('groups by key (2)', () => {
     // TODO: do something with `shows` here
-    const groupedShows = [];
+    const groupedShows = shows.reduce((result, { title, genre }) => {
+      const index = result.findIndex(item => item.genre === genre);
+      index === -1
+        ? result.push({ genre, titles: [title] })
+        : result[index].titles.push(title);
+      return result;
+    }, []);
     expect(groupedShows).toEqual([
       {
         genre: 'Drama',
@@ -52,13 +64,16 @@ describe('reduce method', () => {
     ];
 
     // TODO: do something here
-    const flatArray = [];
+    const flatArray = nestedArray.reduce((acc, cur) => [...acc, ...cur], []);
     expect(flatArray).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
   it('extracts writer names', () => {
     // TODO: do something with `shows` here
-    const writerNames = [];
+    const writerNames = shows.reduce(
+      (result, show) => [...result, ...show.writers],
+      []
+    );
     expect(writerNames).toEqual([
       'Matt Duffer',
       'Ross Duffer',
