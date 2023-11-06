@@ -3,19 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ site.title }}</title>
+  <title>{{ post.title }} | {{ site.title }}</title>
   <link rel="stylesheet" href="/pico.min.css">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <h1>Welcome to {{ site.title }}</h1>
-  <a href="/about">Read about me</a>
-
-  <p>Posts</p>
-  {{#recentPosts}}
-  <p>
-    <a href="{{path}}">{{title}}</a>
-  </p>
-  {{/recentPosts}}
+  <h1>{{post.title}}</h1>
+  <p>Written by {{site.author}} on {{post.created_at}}</p>
+  {{{post.body}}}
 </body>
 </html>
